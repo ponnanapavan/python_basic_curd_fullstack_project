@@ -7,17 +7,19 @@ from models import Friend
 def get_friends():
     friends=Friend.query.all()
     result= [friend.to_json() for friend in friends]
-    return jsonify(result)
+    return jsonify(result), 200
 
 
 @app.route('/api/friends', methods=["POST"])
 def create_friend():
     try:
         data=request.json
+        
         required_fields=["name", "role", "description", "gender"]
         for field in required_fields:
-            if field not in data:
-                return jsonify({"error":f"Missing required field:{field}"}), 400
+            
+            if field not in data or not data.get(field):
+                return jsonify({"error":f"Missing required field: {field}"}), 400
         
         name=data.get("name")
         description=data.get("description")
@@ -34,7 +36,7 @@ def create_friend():
         db.session.add(new_friend)
         #in this i added this friend object in database session but not added in databse
         db.session.commit()
-        return jsonify({"msg":"Friend created successfully"}),201
+        return jsonify(new_friend.to_json()),200
     except Exception as e:
         db.session.rollback()
         return jsonify({"error":str(e)}),500
@@ -49,7 +51,7 @@ def delete_friend(id):
             return jsonify({"error":"Friend is not found"}),404
         db.session.delete(friend)
         db.session.commit()
-        return jsonify({"msg":"Friend Deleted"}),201
+        return jsonify({"msg":"Friend Deleted"}),200
     except Exception as e:
         db.session.rollback() # here i go to previous state
         return jsonify({"error":str(e)}),500
@@ -63,10 +65,9 @@ def update_friend(id):
         data=request.json
         friend.name=data.get("name", friend.name)
         friend.role=data.get("role", friend.role)
-        friend.gender=data.get("gender",friend.gender)
         friend.description=data.get("description", friend.description)
         db.session.commit()
-        return jsonify({"msg":"updated"}),200
+        return jsonify(friend.to_json()),200
     except Exception as e:
          db.session.rollback() # here i go to previous state
          return jsonify({"error":str(e)}),500

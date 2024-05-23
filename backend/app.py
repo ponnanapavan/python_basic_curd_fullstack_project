@@ -20,7 +20,7 @@ dist_folder=os.path.join(frontend_folder, "dist")
 def index(filename):
     if not filename:
         filename="index.html"
-    return send_from_directory(dist_folder, filename)
+    return send_from_directory(dist_folder,filename)
 
 import routes
 
@@ -28,5 +28,5 @@ with app.app_context():
     db.create_all()
 
 if(__name__ == "__main__"):
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0')
 #above app.run is used to run the app.py
